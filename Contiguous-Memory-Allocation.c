@@ -1,120 +1,53 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-void FirstFit(int *holes, int *process, int n, int h)
+void implimentFirstFit(int blockSize[], int blocks, int processSize[], int processes)
 {
-    int j;
-    for (int i = 0; i < n; i++)
+    // This will store the block id of the allocated block to a process
+    int allocate[processes];
+
+    // initially assigning -1 to all allocation indexes
+    // means nothing is allocated currently
+    for (int i = 0; i < processes; i++)
     {
-        for (j = 0; j < h; j++)
+        allocate[i] = -1;
+    }
+
+    // take each process one by one and find
+    // first block that can accomodate it
+    for (int i = 0; i < processes; i++)
+    {
+        for (int j = 0; j < blocks; j++)
         {
-            if (process[i] <= holes[j])
+            if (blockSize[j] >= processSize[i])
             {
-                printf("\nProcess #%d is allocated to hole %d", i, j);
-                holes[j] -= process[i];
+                // allocate block j to p[i] process
+                allocate[i] = j;
+
+                // Reduce size of block j as it has accomodated p[i]
+                blockSize[j] -= processSize[i];
+
                 break;
             }
         }
-        if (j >= h)
-            printf("\nProcess #%d is waiting", i);
     }
-}
 
-void BestFit(int *holes, int *process, int n, int h)
-{
-    int j;
-    for (int i = 0; i < n; i++)
+    printf("\nProcess No.\tProcess Size\tBlock no.\n");
+    for (int i = 0; i < processes; i++)
     {
-        int min_hole = 999999;
-        int min_index = -1;
-        for (j = 0; j < h; j++)
-        {
-            if (min_hole >= holes[j] && holes[j] >= process[i])
-            {
-                min_hole = holes[j];
-                min_index = j;
-            }
-        }
-        if (min_index != -1)
-        {
-            printf("\nProcess #%d is allocated to hole %d", i, min_index);
-            holes[min_index] -= process[i];
-        }
+        printf("%d \t\t\t %d \t\t\t", i + 1, processSize[i]);
+        if (allocate[i] != -1)
+            printf("%d\n", allocate[i] + 1);
         else
-            printf("\nProcess #%d is waiting", i);
-    }
-}
-
-void WorstFit(int *holes, int *process, int n, int h)
-{
-    int j;
-    for (int i = 0; i < n; i++)
-    {
-        int max_hole = -9999;
-        int max_index = -1;
-        for (j = 0; j < h; j++)
-        {
-            if (max_hole <= holes[j] && holes[j] >= process[i])
-            {
-                max_hole = holes[j];
-                max_index = j;
-            }
-        }
-        if (max_index != -1)
-        {
-            printf("\nProcess #%d is allocated to hole %d", i, max_index);
-            holes[max_index] -= process[i];
-        }
-        else
-            printf("\nProcess #%d is waiting", i);
+            printf("Not Allocated\n");
     }
 }
 
 void main()
 {
-    int h;
-    printf("Enter the number of holes: ");
-    scanf("%d", &h);
-    int *holes1 = (int *)malloc(h * sizeof(int));
-    int *holes2 = (int *)malloc(h * sizeof(int));
-    int *holes3 = (int *)malloc(h * sizeof(int));
-    printf("\nEnter hole sizes: ");
-    int s;
-    for (int i = 0; i < h; i++)
-    {
-        scanf("%d", &s);
-        holes1[i] = s;
-        holes2[i] = s;
-        holes3[i] = s;
-    }
+    int blockSize[] = {30, 5, 10};
+    int processSize[] = {10, 6, 9};
+    int m = sizeof(blockSize) / sizeof(blockSize[0]);
+    int n = sizeof(processSize) / sizeof(processSize[0]);
 
-    int n;
-    printf("\nEnter the number of processes: ");
-    scanf("%d", &n);
-
-    int *process = (int *)malloc(n * sizeof(int));
-    printf("\nEnter hole sizes: ");
-
-    for (int i = 0; i < n; i++)
-    {
-        scanf("%d", &s);
-        process[i] = s;
-    }
-    printf("\nHoles sizes:");
-     for (int i = 0; i < h; i++)
-    {
-        printf(" %d",holes1[i]);
-    }
-    printf("\nProcess sizes:");
-     for (int i = 0; i < n; i++)
-    {
-        printf(" %d",process[i]);
-    }
-
-    printf("\n\nFirst Fit");
-    FirstFit(holes1, process, n, h);
-    printf("\n\nBest Fit");
-    BestFit(holes2, process, n, h);
-    printf("\n\nWorst Fit");
-    WorstFit(holes2, process, n, h);
+    implimentFirstFit(blockSize, m, processSize, n);
 }
